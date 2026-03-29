@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TECNOTECH | Presupuestos</title>
+  <meta name="description" content="Generador de presupuestos TECNOTECH para compartir en PDF." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <img src="./assets/logo.png" alt="Logo TECNOTECH" class="brand-logo" />
+      <div class="brand-copy">
+        <h1>Generador de presupuestos</h1>
+        <p>TECNOTECH · WhatsApp +54 9 11 7137 1711</p>
+      </div>
+    </header>
+
+    <section class="card">
+      <div class="card-title-row">
+        <h2>Datos del presupuesto</h2>
+        <span class="budget-number-badge" id="budgetNumberBadge">100-</span>
+      </div>
+
+      <div class="grid-two">
+        <label class="field">
+          <span>Cliente</span>
+          <input type="text" id="client" placeholder="Consumidor Final" />
+          <small>Si no se completa, saldrá como “Consumidor Final”.</small>
+        </label>
+
+        <label class="field">
+          <span>Vehículo</span>
+          <input type="text" id="vehicle" placeholder="No especifica" />
+          <small>Si no se completa, saldrá como “No especifica”.</small>
+        </label>
+      </div>
+
+      <div class="grid-two">
+        <label class="field">
+          <span>Número de presupuesto</span>
+          <input type="text" id="budgetNumber" readonly />
+        </label>
+
+        <label class="field">
+          <span>Fecha de emisión</span>
+          <input type="text" id="issueDate" readonly />
+        </label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title-row">
+        <h2>Ítems</h2>
+        <button type="button" class="btn btn-secondary" id="addItemBtn">+ Agregar ítem</button>
+      </div>
+
+      <div id="itemsList" class="items-list"></div>
+
+      <div class="totals-row">
+        <span>Total general</span>
+        <strong id="grandTotal">$ 0</strong>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Observaciones</h2>
+      <label class="field">
+        <textarea id="observations" rows="4" placeholder="Ej: no incluye colocación, entrega a coordinar, sujeto a disponibilidad, etc."></textarea>
+      </label>
+    </section>
+
+    <section class="actions">
+      <button type="button" class="btn btn-primary" id="generatePdfBtn">GENERAR PDF</button>
+      <button type="button" class="btn btn-light" id="newBudgetBtn">NUEVO PRESUPUESTO</button>
+    </section>
+  </main>
+
+  <section id="pdfTemplate" class="pdf-wrap" aria-hidden="true">
+    <div class="pdf-page">
+      <header class="pdf-header">
+        <div class="pdf-brand">
+          <img src="./assets/logo.png" alt="Logo TECNOTECH" class="pdf-logo" />
+        </div>
+        <div class="pdf-meta">
+          <h2>PRESUPUESTO</h2>
+          <div class="pdf-meta-box">
+            <p><strong>N°:</strong> <span id="pdfBudgetNumber"></span></p>
+            <p><strong>Fecha:</strong> <span id="pdfIssueDate"></span></p>
+          </div>
+        </div>
+      </header>
+
+      <section class="pdf-client-data">
+        <div><strong>Cliente:</strong> <span id="pdfClient"></span></div>
+        <div><strong>Vehículo:</strong> <span id="pdfVehicle"></span></div>
+        <div><strong>WhatsApp:</strong> +54 9 11 7137 1711</div>
+      </section>
+
+      <table class="pdf-table">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Cant.</th>
+            <th>Descripción</th>
+            <th>Precio</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody id="pdfItemsBody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="4" class="tfoot-label">TOTAL</td>
+            <td id="pdfGrandTotal"></td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <section class="pdf-observations">
+        <h3>Observaciones</h3>
+        <p id="pdfObservations"></p>
+      </section>
+
+      <footer class="pdf-footer">
+        <p><strong>Este presupuesto es válido por 48hs.</strong></p>
+      </footer>
+    </div>
+  </section>
+
+  <template id="itemTemplate">
+    <article class="item-card">
+      <div class="item-card-header">
+        <div class="item-code-pill">Código <span class="item-code"></span></div>
+        <button type="button" class="btn-delete" title="Eliminar ítem">Eliminar</button>
+      </div>
+
+      <div class="item-grid">
+        <label class="field">
+          <span>Cantidad</span>
+          <input type="number" class="item-qty" min="1" step="1" value="1" inputmode="numeric" />
+        </label>
+
+        <label class="field item-description-field">
+          <span>Descripción</span>
+          <input type="text" class="item-description" placeholder="N/D" />
+        </label>
+
+        <label class="field">
+          <span>Precio</span>
+          <input type="number" class="item-price" min="0" step="1" value="" placeholder="0" inputmode="numeric" />
+        </label>
+
+        <div class="field total-preview">
+          <span>Total</span>
+          <strong class="item-total">$ 0</strong>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <script src="./app.js"></script>
+</body>
+</html>
